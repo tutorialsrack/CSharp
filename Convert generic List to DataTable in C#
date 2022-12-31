@@ -1,0 +1,56 @@
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Reflection;
+
+namespace Programs
+{
+    internal class Program
+    {
+        static void Main(string[] args)
+        {
+            List<Employee> employees = new List<Employee>(){
+                new Employee() { EmpId=1, EmpName = "Pradeep", Salary = 15000, City="Delhi" },
+                new Employee() { EmpId=1, EmpName = "Smith", Salary = 25000, City = "New York" },
+                new Employee() { EmpId=1, EmpName = "John", Salary = 21000, City = "Goa" },
+                new Employee() { EmpId=1, EmpName = "Tom", Salary = 25000, City = "London" },
+                new Employee() { EmpId=1, EmpName = "Stella", Salary = null, City = "new York" },
+            };
+
+            //listToDataTable lsttodt = new listToDataTable();
+            DataTable dt = listToDataTable(employees);
+        }
+
+        //This method helps you to convert List to a DataTable
+        public static DataTable listToDataTable<T>(List<T> items)
+        {
+            DataTable dataTable = new DataTable(typeof(T).Name);
+            //Get all the properties
+            PropertyInfo[] Props = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance);
+            foreach (PropertyInfo prop in Props)
+            {
+                //Setting column names as Property names
+                dataTable.Columns.Add(prop.Name, Nullable.GetUnderlyingType(prop.PropertyType) ?? prop.PropertyType);
+            }
+            foreach (T item in items)
+            {
+                var values = new object[Props.Length];
+                for (int i = 0; i < Props.Length; i++)
+                {
+                    //inserting property values to datatable rows
+                    values[i] = Props[i].GetValue(item, null);
+                }
+                dataTable.Rows.Add(values);
+            }
+            return dataTable;
+        }
+
+    }
+    public class Employee
+    {
+        public int EmpId { get; set; }
+        public string EmpName { get; set; }
+        public int? Salary { get; set; }
+        public string City { get; set; }
+    }
+}
